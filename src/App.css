@@ -36,3 +36,144 @@
     transform: rotate(360deg);
   }
 }
+
+.diagram-component, .representacion-json {
+  width: 100%;
+  margin: auto; /* Centra el elemento horizontalmente */
+  display: block; /* Asegura que el elemento se comporte como un bloque, necesario para margin auto */
+}
+
+.diagram-component {
+  height: 650px;
+  border: solid 1px black;
+  background-color: rgb(231, 231, 231);
+}
+
+.representacion-json {
+  height: 200px;
+  border: solid 3px black;
+  background-color: white;
+}
+/* Navbar */
+.navbar {
+  background-color: #7EC8E3;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-btn {
+  margin-right: 5px;
+}
+
+.navbar-left,
+.navbar-center,
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-center {
+  justify-content: center;
+  flex-grow: 1;
+}
+/* Botones */
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: white;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.panel-uno {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #FFCC99; /* Fondo naranja claro */
+  width: 300px; /* Ocupa 300px del lado izquierdo */
+}
+
+.left-containeruno {
+  margin-top: 20px;
+  width: 100%; /* Ocupa todo el ancho del contenedor padre */
+}
+.main-container {
+  display: flex;
+}
+
+.left-container {
+  flex: 1;
+  background-color: #FFCC99; /* Fondo naranja claro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Asegura que los elementos se apilen verticalmente */
+  width: 100%;
+}
+
+.diagram-componentu {
+  flex: 1;
+}
+/* Estilo Botones */
+.btn {
+  padding: 10px 10px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  /* Animacion */
+  transition-duration: 0.3s;
+  cursor: pointer;
+
+}
+
+.btn-cel {
+  padding: 10px 10px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  /* Animacion */
+  transition-duration: 0.3s;
+  cursor: pointer;
+
+}
+
+.btn:hover {
+  background-color: rgb(197, 197, 197); 
+  color: black;
+}
+
+.btn-cel:hover {
+  background-color: rgb(198, 241, 241); 
+  color: black;
+}
+
+.subtitulos {
+  font-size: 20px;
+  font-weight: bold;
+}
