@@ -46,7 +46,7 @@
 .diagram-component {
   height: 650px;
   border: solid 1px black;
-  background-color: rgb(231, 231, 231);
+  background-color: white;
 }
 
 .representacion-json {
@@ -56,7 +56,7 @@
 }
 /* Navbar */
 .navbar {
-  background-color: #7EC8E3;
+  background-color: #3C5B6F;
   padding: 10px;
   display: flex;
   justify-content: space-between;
@@ -79,33 +79,13 @@
   flex-grow: 1;
 }
 /* Botones */
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: #928e89;
   color: white;
 }
 
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: white;
-}
-
-.btn-info {
+.btn-primary {
   background-color: #17a2b8;
-  color: white;
-}
-
-.btn-danger {
-  background-color: #dc3545;
   color: white;
 }
 
@@ -113,7 +93,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #FFCC99; /* Fondo naranja claro */
+  background-color: #FFC470; /* Fondo naranja claro */
   width: 300px; /* Ocupa 300px del lado izquierdo */
 }
 
@@ -127,9 +107,9 @@
 
 .left-container {
   flex: 1;
-  background-color: #FFCC99; /* Fondo naranja claro */
+  background-color: #FFC470; /* Fondo naranja claro */
   display: flex;
-  justify-content: center;
+  margin-top: 50px;
   align-items: center;
   flex-direction: column; /* Asegura que los elementos se apilen verticalmente */
   width: 100%;
@@ -175,5 +155,11 @@
 
 .subtitulos {
   font-size: 20px;
+  font-weight: bold;
+}
+
+.texto-blanco {
+  color : white;
+  font-size: 15px;
   font-weight: bold;
 }

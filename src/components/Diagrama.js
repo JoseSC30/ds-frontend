@@ -8,6 +8,13 @@ function init() {
   const $ = go.GraphObject.make;
   myDiagram = $(go.Diagram, {
     allowCopy: false,
+    //Aparece el grid en el diagrama
+    grid: $(go.Panel, 'Grid',
+      $(go.Shape, 'LineH', { stroke: 'lightgray', strokeWidth: 0.5 }),
+      $(go.Shape, 'LineH', { stroke: 'gray', strokeWidth: 0.5, interval: 10 }),
+      $(go.Shape, 'LineV', { stroke: 'lightgray', strokeWidth: 0.5 }),
+      $(go.Shape, 'LineV', { stroke: 'gray', strokeWidth: 0.5, interval: 10 })
+    ),
     linkingTool: $(MessagingTool), // definido abajo
     'resizingTool.isGridSnapEnabled': true,
     draggingTool: $(MessageDraggingTool), // definido abajo
@@ -52,14 +59,27 @@ function init() {
       { name: 'HEADER' },
       $(go.Shape, 'Rectangle', {
         // fill: $(go.Brush, 'Linear', { 0: '#bbdefb', 1: go.Brush.darkenBy('#bbdefb', 0.1) }),//Color de actor
-        fill: $(go.Brush, 'Linear', { 0: '#fbd8bb', 1: go.Brush.darkenBy('#fbd8bb', 0.1) }),//Color de actor
+        fill: $(go.Brush, 'Linear', { 0: '#3C5B6F', 1: go.Brush.darkenBy('#3C5B6F', 0.1) }),//Color de actor
         stroke: null,
       }),
       $(go.TextBlock,
         {
           margin: 5,
           font: '400 12pt Source Sans Pro, sans-serif',//Fuente de actor
-          // font: '400 10pt consolas, sans-serif',
+          //Color de la letra
+          stroke: 'white',
+          //Editar nombre de la linea de vida
+          isMultiline: false,
+          editable: true,
+          textEdited: function(tb) {
+            var node = tb.part;
+            if (node instanceof go.Node) {
+              var data = node.data;
+              if (data !== null) {
+                myDiagram.model.setDataProperty(data, 'text', tb.text);
+              }
+            }
+          }
         },
         new go.Binding('text', 'text')
       )
@@ -68,7 +88,7 @@ function init() {
       {
         figure: 'LineV',
         fill: null,
-        stroke: 'gray',
+        stroke: 'black',
         strokeDashArray: [3, 3],
         width: 1,
         alignment: go.Spot.Center,
@@ -82,6 +102,8 @@ function init() {
       new go.Binding('height', 'duration', computeLifelineHeight)
     )
   );
+
+  
 
   // define the Activity Node template
   myDiagram.nodeTemplate = $(go.Node,
@@ -111,7 +133,7 @@ function init() {
       'Rectangle',
       {
         name: 'SHAPE',
-        fill: '#bbdefb',
+        fill: '#FFC470',
         stroke: 'black',
         width: ActivityWidth,
         // allow Activities to be resized down to 1/4 of a time unit
@@ -297,7 +319,7 @@ class MessagingTool extends go.LinkingTool {
       const start = this.temporaryLink.time;
       const duration = 1.5;
       newlink.data.time = start;
-      model.setDataProperty(newlink.data, 'text', 'mensaje');
+      model.setDataProperty(newlink.data, 'text', 'siguiente');
       // and create a new Activity node data in the "to" group data
       const newact = {
         group: newlink.data.to,
@@ -355,13 +377,8 @@ class MessageDraggingTool extends go.DraggingTool {
   }
 }
 
-function save() {
-  document.getElementById('mySavedModel').value = myDiagram.model.toJson();
-  myDiagram.isModified = false;
-}
-
 //Funcion para descargar el diagrama en su formato JSON, en un archivo txt.
-function descargarArchivoTXT() {
+function descargarArchivoSDS() {
   const text = myDiagram.model.toJson();
   const blob = new Blob([text], { type: 'text/plain' });
   const url = window.URL.createObjectURL(blob);
@@ -369,6 +386,11 @@ function descargarArchivoTXT() {
   link.href = url;
   link.download = 'diagrama.sds';
   link.click();
+}
+
+//Funcion para crear un nuevo diagrama.
+function nuevoDiagrama() {
+  myDiagram.model = new go.GraphLinksModel();
 }
 
 //Funcion para subir un archivo txt y cargarlo en el diagrama.
@@ -435,75 +457,60 @@ function crearNuevoActor() {
   });
 }
 
-function Diagram() {
-  const [modelJson, setModelJson] = React.useState(JSON.stringify({
+export default function Diagrama() {
+  var modelo = React.useState(JSON.stringify({
     class: "go.GraphLinksModel",
-    nodeDataArray: [
-      { key: "lv1", text: "Objeto 1", isGroup: true, loc: "0 0", duration: 12 },
-      { key: "lv2", text: "Objeto 2", isGroup: true, loc: "150 0", duration: 12 },
-      { group: "lv2", start: 1, duration: 1.5, key: -1 },
-    ],
-    linkDataArray: [
-      { from: "lv1", to: "lv2", time: 1, text: "Primer paso" },
-    ]
+    nodeDataArray: [],
+    linkDataArray: []
   }, null, 2));
+
+  function guardarDiagrama() {
+    modelo = myDiagram.model.toJson();
+    myDiagram.isModified = true;//
+  }
 
   return (
     <div>
-      {/* <Navbar /> */}
       <nav className="navbar">
         <div className="container-fluid">
-          <button type="button" className="btn-cel btn-info navbar-btn">Nuevo Diagrama</button>
-          <button className="btn btn-secondary navbar-btn" onClick={subirArchivo}>Importar</button>
+          <button type="button" className="btn-cel btn-primary" onClick={nuevoDiagrama}>Nuevo Diagrama</button>
+          <button type="button" className="btn-cel btn-primary">Invitar Colaboradores</button>
         </div>
         <div className="container-fluid">
-          <button id="SaveButton" className="btn btn-secondary navbar-btn" onClick={save} disabled="">Guardar</button>
-          <button className="btn btn-secondary navbar-btn" onClick={descargarArchivoTXT}>Descargar</button>
-          <button type="button" className="btn-cel btn-info navbar-btn">Invitar Colaboradores</button>
+          <button id="SaveButton" className="btn btn-secondary" onClick={guardarDiagrama} disabled="">Guardar</button>
+          <button className="btn btn-secondary" onClick={descargarArchivoSDS}>Descargar</button>
+          <button className="btn btn-secondary" onClick={subirArchivo}>Importar</button>
         </div>
         <div className="container-fluid">
-          <span className="navbar-text">JUAN GOMEZ</span>
+          <span className="texto-blanco">Exportar en Formato</span>
+          <br />
+          <button className="btn" onClick={descargarSVG}>SVG</button>
+          <button className="btn" onClick={descargarPNG}>PNG</button>
+        </div>
+        <div className="container-fluid">
+          <span className="texto-blanco">JUAN GOMEZ</span>
           <br />
           <button type="button" className="btn btn-danger navbar-btn">Cerrar Sesión</button>
         </div>
       </nav>
       <div className='main-container'>
-        {/* <PanelIzquierdo /> */}
         <div className="panel-uno">
-          <div className="left-container">
-            <div>
-              <p className='subtitulos'>Acciones:</p>
-              <button className="btn" onClick={crearNuevoActor}>Nueva Linea de Vida</button>
+          <div className='left-container'>
+              <p className='subtitulos'>HERRAMIENTAS</p>
+              <button className="btn" onClick={crearNuevoActor}>Crear Linea de Vida</button>
               <br />
-              <button className="btn" onClick={() => myDiagram.commandHandler.undo()}>Deshacer</button>
+              <button className="btn" onClick={() => myDiagram.commandHandler.undo()}>Deshacer Cambios</button>
               <br />
-              <button className="btn" onClick={() => myDiagram.commandHandler.deleteSelection()}>Eliminar Seleccion</button>
-              <br />
-              <button className="btn" onClick={() => myDiagram.commandHandler.selectAll()}>Seleccionar Todo</button>
-            </div>
-            <div>
-              <p className='subtitulos'>Exportar a:</p>
-              <button className="btn" onClick={descargarSVG}>Formato SVG</button>
-              <br />
-              <button className="btn" onClick={descargarPNG}>Formato PNG</button>
-            </div>
+              <button className="btn" onClick={() => myDiagram.commandHandler.deleteSelection()}>Eliminar Seleccion</button> 
           </div>
         </div>
         <ReactDiagram
           initDiagram={init}
           divClassName='diagram-component'
-          nodeDataArray={modelJson.nodeDataArray}
-          linkDataArray={modelJson.linkDataArray}
+          nodeDataArray={modelo.nodeDataArray}
+          linkDataArray={modelo.linkDataArray}
         />
       </div>
-      <textarea
-        id="mySavedModel"
-        className='representacion-json'
-        value={modelJson}
-        onChange={(e) => setModelJson(e.target.value)}
-        style={{ display: 'none' }} />
     </div>
   );
 }
-
-export default Diagram;
