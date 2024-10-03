@@ -22,6 +22,10 @@ export default function Principal() {
     const [diagrams, setDiagrams] = useState([]);
     const [nombreNuevoDiagrama, setNombreNuevoDiagrama] = useState("");
     const [diagramaSeleccionado, setDiagramaSeleccionado] = useState("");
+    //---
+    const [diagramaTercero, setDiagramaTercero] = useState("");
+    const [userTercero, setUserTercero] = useState("");
+    //---
 
     const [user, setUser] = useState(null);
 
@@ -81,10 +85,15 @@ export default function Principal() {
         obtenerDocDeDiagramaSeleccionado();
     }
 
+    const handleNavigationToDiagramaTerceros = () => {
+        console.log("Diagrama seleccionado:", diagramaSeleccionado);
+        const existe = true;
+        navigate(`/diagrama/${diagramaTercero}/${userTercero}/${existe}`);
+    }
+
     const handleNavigationToNewDiagrama = () => {
         if (!user) return;
         crearDiagrama(nombreNuevoDiagrama, diagrams, user.email);
-        // navigate(`/diagrama/${nombreNuevoDiagrama}`, { state: { coleccion: user.email } });
         const coleccion = user.email;
         const existe = false;
         navigate(`/diagrama/${nombreNuevoDiagrama}/${coleccion}/${existe}`);
@@ -93,10 +102,12 @@ export default function Principal() {
     return (
         <div className="container">
             <h1>Bienvenido, {user ? user.email : 'Usuario'}</h1>
+            {/* Acontinuacion un texto que explica que puede crear un nuevo proyecto o unirse a uno existente */}
+            <p>Seleccione una de las siguientes opciones:</p>
 
             <div className="section">
                 <div className="section-header">
-                    <label>Crear nuevo Proyecto:</label>
+                    <label>Crear Nuevo Proyecto:</label>
                 </div>
                 <input
                     className="input-field"
@@ -114,7 +125,7 @@ export default function Principal() {
 
             <div className="section">
                 <div className="section-header">
-                    <label>Unirse a un Proyecto</label>
+                    <label>Mis Proyectos</label>
                 </div>
                 <select
                     className="select-field"
@@ -127,6 +138,29 @@ export default function Principal() {
                     ))}
                 </select>
                 <button className="secondary-button" onClick={() => handleNavigationToDiagramaExistente()}>
+                    Continuar Editando
+                </button>
+            </div>
+
+            <div className="section">
+                <div className="section-header">
+                    <label>Unirme A Otro Proyecto:</label>
+                </div>
+                <input
+                    className="input-field"
+                    type="text"
+                    value={userTercero}
+                    onChange={e => setUserTercero(e.target.value)}
+                    placeholder="User del usuario"
+                />
+                <input
+                    className="input-field"
+                    type="text"
+                    value={diagramaTercero}
+                    onChange={e => setDiagramaTercero(e.target.value)}
+                    placeholder="Nombre del proyecto a editar"
+                />
+                <button className="primary-button" onClick={() => handleNavigationToDiagramaTerceros()}>
                     Unirse a Proyecto
                 </button>
             </div>
