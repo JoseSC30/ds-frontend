@@ -1,18 +1,20 @@
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import Login from './components/Loogin';
-import Diagrama from './components/Diagrama';
+import DiagramaClases from './components/DiagramaClases';
+import Principal from './components/Principal';
+import Login from './components/Login';
+import Register from './components/Register';
+
 
 
 function App() {
   return (
-    // <div className="App">
-    //   <Diagram />
-    // </div>
     <BrowserRouter>
       <Routes>
-        {/* <Route path="/" element={<Login />} /> */}
-        <Route className="App" path="/" element={<Diagrama />} />
+        <Route className="App" path="/diagrama/:nombreDiagrama/:coleccion/:existe" element={<DiagramaClases />} />
+        <Route path="/principal" element={<Principal />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </BrowserRouter>
   );

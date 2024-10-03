@@ -1,23 +1,35 @@
-function init() {
-  // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-  // For details, see https://gojs.net/latest/intro/buildingObjects.html
-  const $ = go.GraphObject.make;
+import { ReactDiagram } from 'gojs-react';
+import * as go from 'gojs';
+import React from 'react';
 
-  myDiagram = new go.Diagram(
-    'myDiagramDiv', // must be the ID or reference to an HTML DIV
-    {
-      allowCopy: false,
-      linkingTool: $(MessagingTool), // defined below
-      'resizingTool.isGridSnapEnabled': true,
-      draggingTool: $(MessageDraggingTool), // defined below
-      'draggingTool.gridSnapCellSize': new go.Size(1, MessageSpacing / 4),
-      'draggingTool.isGridSnapEnabled': true,
-      // automatically extend Lifelines as Activities are moved or resized
-      SelectionMoved: ensureLifelineHeights,
-      PartResized: ensureLifelineHeights,
-      'undoManager.isEnabled': true,
-    }
-  );
+let myDiagram;
+
+function init() {
+  const $ = go.GraphObject.make;
+  myDiagram = $(go.Diagram, {
+    allowCopy: false,
+    //Aparece el grid en el diagrama
+    grid: $(go.Panel, 'Grid',
+      $(go.Shape, 'LineH', { stroke: 'lightgray', strokeWidth: 0.5 }),
+      $(go.Shape, 'LineH', { stroke: 'gray', strokeWidth: 0.5, interval: 10 }),
+      $(go.Shape, 'LineV', { stroke: 'lightgray', strokeWidth: 0.5 }),
+      $(go.Shape, 'LineV', { stroke: 'gray', strokeWidth: 0.5, interval: 10 })
+    ),
+    linkingTool: $(MessagingTool), // definido abajo
+    'resizingTool.isGridSnapEnabled': true,
+    draggingTool: $(MessageDraggingTool), // definido abajo
+    'draggingTool.gridSnapCellSize': new go.Size(1, MessageSpacing / 4),
+    'draggingTool.isGridSnapEnabled': true,
+    // automatically extend Lifelines as Activities are moved or resized
+    SelectionMoved: ensureLifelineHeights,
+    PartResized: ensureLifelineHeights,
+    'undoManager.isEnabled': true,
+    model: $(go.GraphLinksModel,
+      {
+        linkKeyProperty: 'key'
+      }
+    ),
+  });
 
   // when the document is modified, add a "*" to the title and enable the "Save" button
   myDiagram.addDiagramListener('Modified', (e) => {
@@ -46,13 +58,28 @@ function init() {
       'Auto',
       { name: 'HEADER' },
       $(go.Shape, 'Rectangle', {
-        fill: $(go.Brush, 'Linear', { 0: '#bbdefb', 1: go.Brush.darkenBy('#bbdefb', 0.1) }),
+        // fill: $(go.Brush, 'Linear', { 0: '#bbdefb', 1: go.Brush.darkenBy('#bbdefb', 0.1) }),//Color de actor
+        fill: $(go.Brush, 'Linear', { 0: '#3C5B6F', 1: go.Brush.darkenBy('#3C5B6F', 0.1) }),//Color de actor
         stroke: null,
       }),
       $(go.TextBlock,
         {
           margin: 5,
-          font: '400 10pt Source Sans Pro, sans-serif',
+          font: '400 12pt Source Sans Pro, sans-serif',//Fuente de actor
+          //Color de la letra
+          stroke: 'white',
+          //Editar nombre de la linea de vida
+          isMultiline: false,
+          editable: true,
+          textEdited: function(tb) {
+            var node = tb.part;
+            if (node instanceof go.Node) {
+              var data = node.data;
+              if (data !== null) {
+                myDiagram.model.setDataProperty(data, 'text', tb.text);
+              }
+            }
+          }
         },
         new go.Binding('text', 'text')
       )
@@ -61,7 +88,7 @@ function init() {
       {
         figure: 'LineV',
         fill: null,
-        stroke: 'gray',
+        stroke: 'black',
         strokeDashArray: [3, 3],
         width: 1,
         alignment: go.Spot.Center,
@@ -75,6 +102,8 @@ function init() {
       new go.Binding('height', 'duration', computeLifelineHeight)
     )
   );
+
+  
 
   // define the Activity Node template
   myDiagram.nodeTemplate = $(go.Node,
@@ -104,7 +133,7 @@ function init() {
       'Rectangle',
       {
         name: 'SHAPE',
-        fill: 'white',
+        fill: '#FFC470',
         stroke: 'black',
         width: ActivityWidth,
         // allow Activities to be resized down to 1/4 of a time unit
@@ -117,7 +146,7 @@ function init() {
   // define the Message Link template.
   myDiagram.linkTemplate = $(MessageLink, // defined below
     { selectionAdorned: true, curviness: 0 },
-    $(go.Shape, 'Rectangle', { stroke: 'black' }),
+    $(go.Shape, 'Rectangle', { stroke: 'black',strokeDashArray: [4, 2]  }),
     $(go.Shape, { toArrow: 'OpenTriangle', stroke: 'black' }),
     $(go.TextBlock,
       {
@@ -131,8 +160,29 @@ function init() {
     )
   );
 
+  //Definicion del message link con lineas punteadas
+  myDiagram.linkTemplateMap.add('MessageLinkDashed',
+    $(MessageLink, // defined below
+      { selectionAdorned: true, curviness: 0 },
+      $(go.Shape, 'Rectangle', { stroke: 'black', strokeDashArray: [4, 2] }),
+      $(go.Shape, { toArrow: 'OpenTriangle', stroke: 'black' }),
+      $(go.TextBlock,
+        {
+          font: '400 9pt Source Sans Pro, sans-serif',
+          segmentIndex: 0,
+          segmentOffset: new go.Point(NaN, NaN),
+          isMultiline: false,
+          editable: true,
+        },
+        new go.Binding('text', 'text').makeTwoWay()
+      )
+    )
+  );
+
   // create the graph by reading the JSON data saved in "mySavedModel" textarea element
-  load();
+  // load();
+
+  return myDiagram;
 }
 
 function ensureLifelineHeights(e) {
@@ -205,7 +255,7 @@ class MessageLink extends go.Link {
 
   getLinkPoint(node, port, spot, from, ortho, othernode, otherport) {
     const p = port.getDocumentPoint(go.Spot.Center);
-    const r = port.getDocumentBounds();
+    // const r = port.getDocumentBounds();
     const op = otherport.getDocumentPoint(go.Spot.Center);
 
     const data = this.data;
@@ -263,14 +313,10 @@ class MessageLink extends go.Link {
 }
 // end MessageLink
 
-// A custom LinkingTool that fixes the "time" (i.e. the Y coordinate)
-// for both the temporaryLink and the actual newly created Link
 class MessagingTool extends go.LinkingTool {
   constructor() {
     super();
 
-    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-    // For details, see https://gojs.net/latest/intro/buildingObjects.html
     const $ = go.GraphObject.make;
     this.temporaryLink = $(MessageLink,
       $(go.Shape, 'Rectangle', { stroke: 'magenta', strokeWidth: 2 }),
@@ -290,9 +336,9 @@ class MessagingTool extends go.LinkingTool {
       const model = this.diagram.model;
       // specify the time of the message
       const start = this.temporaryLink.time;
-      const duration = 1;
+      const duration = 1.5;
       newlink.data.time = start;
-      model.setDataProperty(newlink.data, 'text', 'msg');
+      model.setDataProperty(newlink.data, 'text', 'siguiente');
       // and create a new Activity node data in the "to" group data
       const newact = {
         group: newlink.data.to,
@@ -306,10 +352,7 @@ class MessagingTool extends go.LinkingTool {
     return newlink;
   }
 }
-// end MessagingTool
 
-// A custom DraggingTool that supports dragging any number of MessageLinks up and down --
-// changing their data.time value.
 class MessageDraggingTool extends go.DraggingTool {
   // override the standard behavior to include all selected Links,
   // even if not connected with any selected Nodes
@@ -352,14 +395,141 @@ class MessageDraggingTool extends go.DraggingTool {
     }
   }
 }
-// end MessageDraggingTool
 
-// Show the diagram's model in JSON format
-function save() {
-  document.getElementById('mySavedModel').value = myDiagram.model.toJson();
-  myDiagram.isModified = false;
+//Funcion para descargar el diagrama en su formato JSON, en un archivo txt.
+function descargarArchivoSDS() {
+  const text = myDiagram.model.toJson();
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'diagrama.sds';
+  link.click();
 }
-function load() {
-  myDiagram.model = go.Model.fromJson(document.getElementById('mySavedModel').value);
+
+//Funcion para crear un nuevo diagrama.
+function nuevoDiagrama() {
+  myDiagram.model = new go.GraphLinksModel();
 }
-window.addEventListener('DOMContentLoaded', init);
+
+//Funcion para subir un archivo txt y cargarlo en el diagrama.
+function subirArchivo() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.sds';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      myDiagram.model = go.Model.fromJson(text);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function descargarSVG() {
+  const svg = myDiagram.makeSvg({
+    scale: 1,
+    background: 'white',
+    documentTitle: 'Diagrama de secuencia',
+  });
+  const svgstr = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([svgstr], { type: 'image/svg+xml' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'diagrama.svg';
+  link.click();
+}
+
+function descargarPNG() {
+  const img = myDiagram.makeImage({
+    scale: 2,
+    background: 'white',
+    type: 'image/png',
+  });
+  const link = document.createElement('a');
+  link.href = img.src;
+  link.download = 'diagrama.png';
+  link.click();
+}
+
+function crearNuevoActor() {
+  const actores = myDiagram.model.nodeDataArray;
+  let aux = 1;
+  const longitud = actores.length;
+  for (let i = 0; i < longitud; i++) {
+    const actor = actores[i];
+    //Consulto si la primera parte del key es igual a actor
+    if (typeof actor.key === 'string' && actor.key.substring(0, 2) === 'lv') {
+      aux++;
+    }
+  }
+  myDiagram.model.addNodeData({
+    key: 'lv' + (aux),
+    text: 'Objeto ' + (aux),
+    isGroup: true,
+    loc: '0 0',
+    duration: 12,
+  });
+}
+//Esta es la funcion se llama cuando se carga el diagrama en App.js (Diagrama)
+export default function Diagrama() {
+  var modelo = React.useState(JSON.stringify({
+    class: "go.GraphLinksModel",
+    nodeDataArray: [],
+    linkDataArray: []
+  }, null, 2));
+
+  function guardarDiagrama() {
+    modelo = myDiagram.model.toJson();
+    myDiagram.isModified = true;//
+  }
+
+  return (
+    <div>
+      <nav className="navbar">
+        <div className="container-fluid">
+          <button type="button" className="btn-cel btn-primary" onClick={nuevoDiagrama}>Nuevo Diagrama</button>
+          <button type="button" className="btn-cel btn-primary">Invitar Colaboradores</button>
+        </div>
+        <div className="container-fluid">
+          <button id="SaveButton" className="btn btn-secondary" onClick={guardarDiagrama} disabled="">Guardar</button>
+          <button className="btn btn-secondary" onClick={descargarArchivoSDS}>Descargar</button>
+          <button className="btn btn-secondary" onClick={subirArchivo}>Importar</button>
+        </div>
+        <div className="container-fluid">
+          <span className="texto-blanco">Exportar en Formato</span>
+          <br />
+          <button className="btn" onClick={descargarSVG}>SVGG</button>
+          <button className="btn" onClick={descargarPNG}>PNG</button>
+        </div>
+        <div className="container-fluid">
+          <span className="texto-blanco">JUAN GOMEZ</span>
+          <br />
+          <button type="button" className="btn btn-danger navbar-btn">Cerrar Sesión</button>
+        </div>
+      </nav>
+      <div className='main-container'>
+        <div className="panel-uno">
+          <div className='left-container'>
+              <p className='subtitulos'>HERRAMIENTAS</p>
+              <button className="btn" onClick={crearNuevoActor}>Crear Linea de Vida</button>
+              <br />
+              <button className="btn" onClick={() => myDiagram.commandHandler.undo()}>Deshacer Cambios</button>
+              <br />
+              <button className="btn" onClick={() => myDiagram.commandHandler.deleteSelection()}>Eliminar Seleccion</button> 
+          </div>
+        </div>
+        <ReactDiagram
+          initDiagram={init}
+          divClassName='diagram-component'
+          nodeDataArray={modelo.nodeDataArray}
+          linkDataArray={modelo.linkDataArray}
+        />
+      </div>
+    </div>
+  );
+}
