@@ -451,10 +451,8 @@ export default function DiagramaClases() {
     useEffect(() => {
         const loadDiagram = async () => {
             if (myDiagram) {
-                // if (diagrams.find(diagram => diagram.id === nombreDiagrama))
                 if (existe === "true") {
                     await cargarDiagramaDesdeFirestore();
-                    console.log("Suecia");
                 } else {
                     myDiagram.model = new go.GraphLinksModel({
                         linkKeyProperty: "key",
