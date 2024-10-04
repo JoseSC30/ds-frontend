@@ -228,7 +228,7 @@ function initDiagram() {
                                     diagram.commitTransaction('addAttribute');
                                 }
                             })
-                                .add(new go.TextBlock('ADD', {
+                                .add(new go.TextBlock('+', {
                                     font: '14px sans-serif',
                                     stroke: 'green',
                                     margin: new go.Margin(0, 5, 0, 5)
@@ -242,7 +242,7 @@ function initDiagram() {
                                 itemTemplate: itemTempl
                             })
                                 .bind('itemArray', 'items'),
-                            new go.TextBlock('Atributos heredados', {
+                            new go.TextBlock('                         ', {
                                 row: 2,
                                 alignment: go.Spot.Left,
                                 margin: new go.Margin(3, 24, 3, 2),
@@ -250,12 +250,12 @@ function initDiagram() {
                             })
                                 .bind('visible', 'inheritedItems', (arr) => Array.isArray(arr) && arr.length > 0)
                                 .theme('stroke', 'text'),
-                            go.GraphObject.build('PanelExpanderButton', {
-                                row: 2,
-                                alignment: go.Spot.Right
-                            }, 'Inherited')
-                                .bind('visible', 'inheritedItems', (arr) => Array.isArray(arr) && arr.length > 0)
-                                .theme('ButtonIcon.stroke', 'text'),
+                            // go.GraphObject.build('PanelExpanderButton', {
+                            //     row: 2,
+                            //     alignment: go.Spot.Right
+                            // }, 'Inherited')
+                            //     .bind('visible', 'inheritedItems', (arr) => Array.isArray(arr) && arr.length > 0)
+                            //     .theme('ButtonIcon.stroke', 'text'),
                             new go.Panel('Vertical', {
                                 row: 3,
                                 name: 'Inherited',
@@ -351,12 +351,9 @@ const cambioDeTema = () => {
 
 export default function DiagramaClases() {
 
-    // const { nombreDiagrama } = useParams();
-    // const location = useLocation();
-    // const { coleccion } = location.state?.coleccion;
     const { nombreDiagrama, coleccion, existe } = useParams();
     const navigate = useNavigate();
-    //------
+
     async function guardarDiagrama() {
         if (myDiagram) {
             const data = myDiagram.model.toJson();
@@ -426,7 +423,6 @@ export default function DiagramaClases() {
         });
         guardarDiagrama(); // Guardar después de crear una nueva relación
     }
-    //------
 
     const [modelo, setModelo] = useState({
         class: "go.GraphLinksModel",
@@ -496,9 +492,6 @@ export default function DiagramaClases() {
             console.log("ZZDocument data:", docSnap.data().data);
             const data = docSnap.data().data;
             myDiagram.model = go.Model.fromJson(data);
-            console.log("espania");
-            // setIsLocalChange(false);
-            // setIsLocalChange(true);
         }
     };
 
@@ -529,12 +522,15 @@ export default function DiagramaClases() {
         window.location.reload();
     }
 
+    const volverAPrincipal = () => {
+        navigate('/principal');
+    }
+
     return (
         <div>
             <nav className="navbar">
-                {/* ... (mantener los botones y controles existentes) */}
                 <div className="container-fluid">
-                    <button type="button" className="btn-cel btn-primary">Invitar Colaboradores</button>
+                    <button type="button" className="btn-cel btn-primary" onClick={() => volverAPrincipal()}>Volver a Principal</button>
                 </div>
                 <div className="container-fluid">
                     <button id="SaveButton" className="btn btn-secondary" onClick={guardarDiagrama}>Guardar</button>
@@ -549,16 +545,16 @@ export default function DiagramaClases() {
             <div className='main-container'>
                 <div className="panel-uno">
                     <div className='left-container'>
-                        <p className='subtitulos'>HERRAMIENTAS</p>
-                        <button className="btn" onClick={crearTabla}>Crear Tabla</button>
-                        <br />
-                        <button className="btn" onClick={() => myDiagram.commandHandler.undo()}>Deshacer Cambios</button>
-                        <br />
-                        <button className="btn" onClick={() => myDiagram.commandHandler.deleteSelection()}>Eliminar Seleccion</button>
+                        <p className='subtitulos'>Seleccionar Tema</p>
                         <select id="theme" onChange={cambioDeTema} defaultValue="light">
                             <option value="light">Tema Claro</option>
                             <option value="dark">Tema Oscuro</option>
                         </select>
+                        <p className='subtitulos'>HERRAMIENTAS</p>
+                        <button className="btn" onClick={crearTabla}>Crear Tabla</button>
+                        <button className="btn" onClick={() => myDiagram.commandHandler.undo()}>Deshacer Cambios</button>
+                        <button className="btn" onClick={() => myDiagram.commandHandler.deleteSelection()}>Eliminar Seleccion</button>
+
                         <div>
                             <h4>Crear Relación</h4>
                             <select value={fromTable} onChange={(e) => setFromTable(e.target.value)}>
@@ -609,11 +605,9 @@ export default function DiagramaClases() {
                                 value={nDiagrama}
                                 onChange={(e) => setNDiagrama(e.target.value)}
                             />
-                            {/* <button onClick={() => cargarDiagramaDesdeFirestore()}>Unirse</button> */}
                             <button onClick={() => unirseAOtroProyecto()}>Unirse</button>
-                            </div>
+                        </div>
                     </div>
-
                 </div>
                 <ReactDiagram
                     initDiagram={initDiagram}
