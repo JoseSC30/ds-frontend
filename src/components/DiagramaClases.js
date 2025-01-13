@@ -470,7 +470,7 @@ export default function DiagramaClases() {
                 });
             }
 
-            // Configurar un listener para cambios en tiempo real (de Firestore a la app)
+            
             const unsubscribe = onSnapshot(doc(db, nColeccion, nDiagrama), (doc) => {
                 if (doc.exists()) {
                     const data = doc.data().data;
@@ -478,7 +478,7 @@ export default function DiagramaClases() {
                     myDiagram.model = go.Model.fromJson(data);
                 }
             });
-            // Limpiar el listener cuando el componente se desmonte//
+            
             return () => unsubscribe();
         };
 
